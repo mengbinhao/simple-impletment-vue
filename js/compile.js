@@ -18,6 +18,14 @@ class Compile {
         return node.nodeType == 3;
     }
 
+    isDirective(attr) {
+        return attr.startsWith('v-')
+    }
+
+    isEventDirevtive(dir) {
+        return dir.startsWith('on')
+    }
+
     node2Fragment(el) {
         let fragment = document.createDocumentFragment()
         let child
@@ -30,7 +38,7 @@ class Compile {
     compileElement(el) {
         let childNodes = el.childNodes
         Array.from(childNodes).forEach(node => {
-            let reg = /\{\{(.+)\}\}/g
+            let reg = /\{\{\s*(\S+)\s*\}\}/g
             if (this.isElement(node)) {
                 //compile element
                 this.compile(node)
@@ -44,8 +52,20 @@ class Compile {
         })
     }
 
-    compile() {
-
+    compile(node) {
+        let nodeAttrs = node.attributes
+        Array.from(nodeAttrs).forEach(arr => {
+            let attrName = arr.name
+            if (this.isDirective(attrName)) {
+                let exp = arr.value
+                let dir = attrName.substring(2)
+                if (this.isEventDirevtive(dir)) {
+                    compileUtils.eventHandler(node, this.$vm, exp, dir)
+                } else {
+                    compileUtils[dir] && compileUtils[dir](node, this.$vm, exp)
+                }
+            }
+        })
     }
 
     compileText(node, expr) {
@@ -70,6 +90,13 @@ let compileUtils = {
             val = val[k.trim()]
         })
         return val
+    },
+    eventHandler(node, vm, exp, dir) {
+        let eventType = dir.split(':')[1]
+            fn = vm.$options.methods && vm.$options.methods[exp]
+        if (eventType && fn) {
+            node.addEventListener(eventType, fn.bind(vm), false)
+        }
     }
 }
 
