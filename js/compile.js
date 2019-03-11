@@ -29,13 +29,13 @@ class Compile {
 
     compileElement(el) {
         let childNodes = el.childNodes
-        let reg = /\{\{(.+)\}\}/g
         Array.from(childNodes).forEach(node => {
+            let reg = /\{\{(.+)\}\}/g
             if (this.isElement(node)) {
                 //compile element
                 this.compile(node)
             } else if (this.isTextNode(node) && reg.test(node.textContent)) {
-                this.compileText(node, RegExp.$1.trim())
+                this.compileText(node, RegExp.$1)
             }
 
             if (node.childNodes && node.childNodes.length) {
@@ -67,7 +67,7 @@ let compileUtils = {
         let val = vm
         let exprs = expr.split('.')
         exprs.forEach(k => {
-            val = val[k]
+            val = val[k.trim()]
         })
         return val
     }

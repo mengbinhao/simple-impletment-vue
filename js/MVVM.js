@@ -10,7 +10,7 @@ class MVVM {
         })
 
         //监听
-        if (this.$data !== null || typeof data === 'object') {
+        if (this.$data !== null && typeof this.$data === 'object') {
             new Observe(this.$data)
         }
 

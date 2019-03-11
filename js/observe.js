@@ -15,11 +15,9 @@ class Observe {
             configurable: false,
             enumerable: true,
             get() {
-                console.log('get')
                 return val
             },
             set(newVal) {
-                console.log('set')
                 if (newVal === val) return
                 val = newVal
             }
