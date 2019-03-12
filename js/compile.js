@@ -5,7 +5,7 @@ class Compile {
 
         if (this.$el) {
             this.$fragment = this.node2Fragment(this.$el)
-            this.compileElement(this.$fragment)
+            this.init(this.$fragment)
             this.$el.appendChild(this.$fragment)
         }
     }
@@ -24,6 +24,10 @@ class Compile {
 
     isEventDirevtive(dir) {
         return dir.startsWith('on')
+    }
+
+    init(el) {
+        this.compileElement(el)
     }
 
     node2Fragment(el) {
@@ -45,7 +49,7 @@ class Compile {
             } else if (this.isTextNode(node) && reg.test(node.textContent)) {
                 this.compileText(node, RegExp.$1)
             }
-
+            //recusion
             if (node.childNodes && node.childNodes.length) {
                 this.compileElement(node)
             }
@@ -76,13 +80,19 @@ class Compile {
 
 // 指令处理集合
 let compileUtils = {
-    text(node, vm, expr) {
-        this.bind(node, vm, expr, 'text')
-    },
     bind(node, vm, expr, dir) {
         let updateFn = updater[dir + 'Updater']
         updateFn && updateFn(node, this._getVMVal(vm, expr))
     },
+
+    eventHandler(node, vm, exp, dir) {
+        let eventType = dir.split(':')[1]
+        fn = vm.$options.methods && vm.$options.methods[exp]
+        if (eventType && fn) {
+            node.addEventListener(eventType, fn.bind(vm), false)
+        }
+    },
+
     _getVMVal(vm, expr) {
         let val = vm
         let exprs = expr.split('.')
@@ -91,17 +101,43 @@ let compileUtils = {
         })
         return val
     },
-    eventHandler(node, vm, exp, dir) {
-        let eventType = dir.split(':')[1]
-            fn = vm.$options.methods && vm.$options.methods[exp]
-        if (eventType && fn) {
-            node.addEventListener(eventType, fn.bind(vm), false)
-        }
+    _setVMVal(vm, exp, value) {
+        let val = vm
+            exps = exp.split('.')
+        exps.forEach((k, i) => {
+            //非最后一个key,更新val值
+            if (i < exps.length - 1) {
+                val = val[k]
+            } else {
+                val[k] = value
+            }
+        })
+    },
+
+    model(node, vm, exp) {
+        this.bind(node, vm, exp, 'model')
+
+        let val = this._getVMVal(vm, exp)
+
+        node.addEventListener('input', (e) => {
+            let newVal = e.target.value
+            if (val === newVal) return
+            this._setVMVal(vm, exp, newVal)
+            val = newVal
+        })
+    },
+
+    text(node, vm, expr) {
+        this.bind(node, vm, expr, 'text')
     }
 }
 
 let updater = {
     textUpdater(node, value) {
         node.textContent = typeof value === 'undefined' ? '' : value
+    },
+
+    modelUpdater(node, value) {
+        node.value = typeof value === 'undefined' ? '' : value
     }
 }
