@@ -13,15 +13,16 @@
         <input type="text" v-model="message">
         <div>
             <ul>
-                <li></li>
+                <li>this is DIV</li>
             </ul>
         </div>
-        {{ message }}
+        {{ message }} {{ message }}
         <br />
         {{ message }}
         <button v-on:click="changeModel">click</button>
     </div>
     <script src="./js/observe.js"></script>
+    <script src="./js/watcher.js"></script>
     <script src="./js/compile.js"></script>
     <script src="./js/MVVM.js"></script>
     <script>
