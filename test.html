@@ -9,7 +9,7 @@
 <body>
     <div id="app">
         <input type="text" v-model="message">
-        {{ message }} -- {{ message }}
+        {{ message }} -- {{ message2 }}
         <br>
         <button v-on:click="changeModel">click</button>
     </div>
@@ -18,7 +18,8 @@
         const vm = new Vue({
             el: '#app',
             data: {
-                message: 'jack'
+                message: 'jack',
+                message2: 'feifei'
             },
             methods: {
                 changeModel() {

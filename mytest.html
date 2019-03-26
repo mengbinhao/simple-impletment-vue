@@ -16,9 +16,10 @@
                 <li>this is DIV</li>
             </ul>
         </div>
-        {{ message }} {{ message }}
+        {{ message1 }} {{ message2 }}
         <br />
-        {{ message }}
+        {{ message2 }}
+        <hr />
         <button v-on:click="changeModel">click</button>
     </div>
     <script src="./js/observe.js"></script>
@@ -29,7 +30,8 @@
         const vm = new MVVM({
             el: '#app',
             data: {
-                message: 'jack'
+                message1: 'jack',
+                message2: 'feifei'
             },
             methods: {
                 changeModel() {

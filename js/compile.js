@@ -47,7 +47,7 @@ class Compile {
         this.compile(node)
         //{{a}} {{b}} {{c}}
       } else if (this.isTextNode(node) && reg.test(node.textContent)) {
-        this.compileText(node, RegExp.$1)
+        this.compileText(node, node.textContent.match(reg))
       }
 
       //recusion
@@ -66,7 +66,7 @@ class Compile {
         let [, dir] = attrName.split('-')
         if (this.isEventDirevtive(dir)) {
           compileUtils.eventHandler(node, this.$vm, expr, dir)
-          //normal directive
+        //normal directive
         } else {
           compileUtils[dir] && compileUtils[dir](node, this.$vm, expr)
         }
@@ -89,7 +89,7 @@ let compileUtils = {
     updateFn && updateFn(node, this.getVMVal(vm, expr))
 
     //增加监控
-    //has bug  {{ message }} {{ message }}
+    //bug  {{ message1 }} {{ message2 }}
     new Watcher(vm, expr, function(value, oldValue) {
       updateFn && updateFn(node, value, oldValue)
     })
@@ -150,7 +150,12 @@ let compileUtils = {
   },
 
   text(node, vm, expr) {
-    this.bind(node, vm, expr, 'text')
+    expr.forEach((exp) => {
+      function replacer(match, p1) {
+        return p1
+      }
+      this.bind(node, vm, exp.replace(/\{\{\s*(\S+)\s*\}\}/g, replacer), 'text')
+    })
   },
 
   html: function(node, vm, exp) {
